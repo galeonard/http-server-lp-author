@@ -8,14 +8,14 @@ RUN <<EOT bash
     apt-get install -y \
         git \
         clang
-    rustup target add wasm32-wasi
+    rustup target add wasm32-wasip1
 EOT
 
 FROM buildbase AS build
 COPY Cargo.toml .
 COPY src ./src 
 # Build the Wasm binary
-RUN cargo build --target wasm32-wasi --release
+RUN cargo build --target wasm32-wasip1 --release
 
 FROM scratch
 ENTRYPOINT [ "/hello.wasm" ]
