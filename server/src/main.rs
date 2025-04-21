@@ -1,7 +1,7 @@
-use std::net::SocketAddr;
 use hyper::server::conn::Http;
 use hyper::service::service_fn;
 use hyper::{Body, Method, Request, Response, StatusCode};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 /// This is our service handler. It receives a Request, routes on its
@@ -15,6 +15,19 @@ async fn handle_request(req: Request<Body>) -> Result<Response<Body>, hyper::Err
 
         // Simply echo the body back to the client.
         (&Method::POST, "/echo") => Ok(Response::new(req.into_body())),
+
+        (&Method::POST, "/parrot") => {
+            let body = hyper::body::to_bytes(req.into_body()).await?;
+            let body_str = std::str::from_utf8(&body).unwrap();
+            let mut new_body = String::from("You said: ");
+            if body_str.is_empty() {
+                new_body.push_str("nothing");
+            } else {
+                new_body.push_str(body_str);
+            }
+            let body = format!("{}{}", new_body, "\n");
+            Ok(Response::new(Body::from(body)))
+        }
 
         (&Method::POST, "/echo/reversed") => {
             let whole_body = hyper::body::to_bytes(req.into_body()).await?;
